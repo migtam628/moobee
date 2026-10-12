@@ -61,14 +61,14 @@ server-only. Anything prefixed `VITE_` is shipped to the browser. `VITE_TMDB_API
 insecure dev shortcut and must not be used in production. Do not put the stream admin key in a
 `VITE_` variable.
 
-| Name                             | Where  | Purpose                                                                                  |
-| -------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
-| `TMDB_READ_ACCESS_TOKEN`         | server | TMDB read token. The proxy adds it; the browser never sees it.                          |
-| `VITE_PLAYBACK_PROVIDER_BASE_URL`| public | Embed origin. `https` for any host, or `http` only for `localhost` / `127.0.0.1`.       |
-| `UPLOAD_PAGE_PASSWORD`           | server | Shared password for `/upload`. If unset, upload routes return 503.                      |
-| `UPLOAD_SESSION_SECRET`          | server | HMAC secret for the upload session cookie.                                              |
-| `STREAM_ADMIN_API_KEY`           | server | MooBee Stream admin key. Attached by the upload proxy, never sent to the browser.       |
-| `STREAM_API_BASE_URL`            | server | Stream API base. Defaults to `http://127.0.0.1:8080/api`.                               |
+| Name                              | Where  | Purpose                                                                           |
+| --------------------------------- | ------ | --------------------------------------------------------------------------------- |
+| `TMDB_READ_ACCESS_TOKEN`          | server | TMDB read token. The proxy adds it; the browser never sees it.                    |
+| `VITE_PLAYBACK_PROVIDER_BASE_URL` | public | Embed origin. `https` for any host, or `http` only for `localhost` / `127.0.0.1`. |
+| `UPLOAD_PAGE_PASSWORD`            | server | Shared password for `/upload`. If unset, upload routes return 503.                |
+| `UPLOAD_SESSION_SECRET`           | server | HMAC secret for the upload session cookie.                                        |
+| `STREAM_ADMIN_API_KEY`            | server | MooBee Stream admin key. Attached by the upload proxy, never sent to the browser. |
+| `STREAM_API_BASE_URL`             | server | Stream API base. Defaults to `http://127.0.0.1:8080/api`.                         |
 
 ## Playback status
 
@@ -82,6 +82,19 @@ unavailable state. Leaving the variable unset still shows "Playback isn't availa
 `/upload` accepts a file, a title, a media type, and a TMDB id (plus season and episode for TV)
 and streams it to Stream's admin API. It is not linked from the nav or the footer. Sign in with
 `UPLOAD_PAGE_PASSWORD`. Only upload video you are allowed to host.
+
+## Deploy with Docker
+
+The `Dockerfile` builds the site and runs the production server (`npm start`) in one small image:
+
+```bash
+docker build -t moobee .
+docker run -p 8787:8787 -e TMDB_READ_ACCESS_TOKEN=... moobee
+```
+
+Pass `--build-arg PLAYBACK_BASE_URL=https://your-player.example` only if you run your own player (see
+[Playback status](#playback-status)); it is compiled into the site, so changing it means building again. The server speaks plain HTTP: put a reverse proxy that does HTTPS in front of it (Caddy, nginx, a platform's load
+balancer).
 
 ## Architecture
 
