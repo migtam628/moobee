@@ -1,0 +1,111 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+/*
+ * MooBee design tokens. Very dark neutrals, one warm "honey" accent.
+ * Tailwind generates utilities from these (bg-canvas, text-muted, border-line, ...).
+ */
+@theme {
+  --font-sans:
+    'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --color-canvas: #09090b;
+  --color-surface: #111114;
+  --color-raised: #1a1a1f;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-fg: #f4f4f5;
+  --color-muted: #a1a1aa;
+  --color-accent: #f5b800;
+  --color-accent-strong: #ffc933;
+  --color-accent-fg: #1a1400;
+  --color-danger: #f87171;
+
+  --animate-fade-in: fade-in 0.7s ease-out both;
+  --animate-fade-up: fade-up 0.7s ease-out both;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    background-color: var(--color-canvas);
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 0.375rem;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-accent) 40%, transparent);
+  }
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/*
+ * Horizontal padding shared by every full-width section so navbar, hero, headings and rows all
+ * share one left edge. On very wide screens the content column is capped at 120rem and centred
+ * while scrollers stay full-bleed. Also sets scroll-padding so snapped cards line up with it.
+ */
+@utility page-gutter {
+  --page-gutter: 1rem;
+  --page-inline: max(var(--page-gutter), calc((100% - 120rem) / 2 + var(--page-gutter)));
+  padding-inline: var(--page-inline);
+  scroll-padding-inline: var(--page-inline);
+  @media (min-width: 40rem) {
+    --page-gutter: 1.5rem;
+  }
+  @media (min-width: 64rem) {
+    --page-gutter: 3rem;
+  }
+  @media (min-width: 96rem) {
+    --page-gutter: 4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
