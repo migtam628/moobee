@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatAirDate, formatRuntime, formatYearRange, pluralize } from './format';
+import { formatAirDate, formatCount, formatRuntime, formatYearRange, pluralize } from './format';
 
 describe('formatRuntime', () => {
   it.each([
@@ -56,5 +56,21 @@ describe('formatAirDate', () => {
 
   it.each([undefined, '', 'not-a-date', '2026-13-40'])('returns undefined for %j', (value) => {
     expect(formatAirDate(value)).toBeUndefined();
+  });
+});
+
+describe('formatCount', () => {
+  it('shortens big counts', () => {
+    expect(formatCount(950)).toBe('950');
+    expect(formatCount(1234)).toBe('1.2K');
+    expect(formatCount(28_400)).toBe('28.4K');
+    expect(formatCount(28_000)).toBe('28K');
+    expect(formatCount(3_400_000)).toBe('3.4M');
+  });
+
+  it('returns undefined for a missing or invalid count', () => {
+    expect(formatCount(undefined)).toBeUndefined();
+    expect(formatCount(-1)).toBeUndefined();
+    expect(formatCount(Number.NaN)).toBeUndefined();
   });
 });

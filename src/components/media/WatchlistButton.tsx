@@ -8,11 +8,18 @@ interface WatchlistButtonProps {
   item: MediaItem;
   /** `pill`: labelled button for a detail page. `icon`: compact quick action for a card. */
   variant?: 'pill' | 'icon';
+  /** Pill only. `sm` is the compact size used in the player page's action row. */
+  size?: 'md' | 'sm';
   className?: string;
 }
 
 /** Toggles `item` in the watchlist. Reflects and updates the shared library store directly. */
-export function WatchlistButton({ item, variant = 'pill', className }: WatchlistButtonProps) {
+export function WatchlistButton({
+  item,
+  variant = 'pill',
+  size = 'md',
+  className,
+}: WatchlistButtonProps) {
   const { isInWatchlist, toggleWatchlist } = useLibrary();
   const saved = isInWatchlist(item);
   const Icon = saved ? BookmarkCheck : Bookmark;
@@ -48,7 +55,8 @@ export function WatchlistButton({ item, variant = 'pill', className }: Watchlist
       aria-pressed={saved}
       onClick={handleClick}
       className={cn(
-        'inline-flex items-center gap-2 rounded-full bg-white/10 px-6 py-3 text-sm font-semibold text-fg transition hover:bg-white/15',
+        'inline-flex items-center gap-2 rounded-full bg-white/10 text-sm font-semibold text-fg transition hover:bg-white/15',
+        size === 'sm' ? 'px-4 py-2' : 'px-6 py-3',
         className,
       )}
     >
