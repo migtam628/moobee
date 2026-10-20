@@ -9,9 +9,9 @@ export function MobileNav() {
       aria-label="Mobile"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
     >
-      <ul className="grid grid-cols-5">
+      <ul className="flex">
         {NAV_ITEMS.map(({ label, to, icon: Icon, end }) => (
-          <li key={to}>
+          <li key={to} className="min-w-0 flex-1">
             <NavLink
               to={to}
               end={end ?? false}

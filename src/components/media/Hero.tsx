@@ -1,11 +1,11 @@
-import { Info } from 'lucide-react';
+import { Dices, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getBackdropSrcSet, getBackdropUrl } from '@/api/tmdb/images';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { cn } from '@/lib/cn';
 import { getMediaKey, getMediaTypeLabel } from '@/lib/media';
-import { getMediaPath } from '@/lib/routes';
+import { getMediaPath, paths } from '@/lib/routes';
 import type { MediaItem } from '@/types/media';
 import { RatingBadge } from './RatingBadge';
 
@@ -117,6 +117,13 @@ export function Hero({ items, eyebrow = 'Trending this week' }: HeroProps) {
               <Info aria-hidden="true" className="size-4" />
               View details
               <span className="sr-only">: {current.title}</span>
+            </Link>
+            <Link
+              to={paths.surprise}
+              className="inline-flex items-center gap-2 rounded-full bg-white/10 px-6 py-3 text-sm font-semibold text-fg backdrop-blur-sm transition hover:bg-white/15"
+            >
+              <Dices aria-hidden="true" className="size-4" />
+              Surprise me
             </Link>
           </div>
         </div>

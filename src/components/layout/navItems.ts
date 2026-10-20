@@ -1,4 +1,13 @@
-import { Bookmark, Clapperboard, House, Search, Sparkles, Tv, type LucideIcon } from 'lucide-react';
+import {
+  Bookmark,
+  Clapperboard,
+  Dices,
+  House,
+  Search,
+  Sparkles,
+  Tv,
+  type LucideIcon,
+} from 'lucide-react';
 import { paths } from '@/lib/routes';
 
 export interface NavItem {
@@ -14,6 +23,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Movies', to: paths.movies, icon: Clapperboard },
   { label: 'TV Shows', to: paths.tv, icon: Tv, end: true },
   { label: 'Anime', to: paths.anime, icon: Sparkles, end: true },
+  { label: 'Surprise', to: paths.surprise, icon: Dices, end: true },
   { label: 'My List', to: paths.watchlist, icon: Bookmark, end: true },
   { label: 'Search', to: paths.search, icon: Search },
 ];

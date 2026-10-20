@@ -19,9 +19,13 @@ A movie and TV discovery app powered by [TMDB](https://www.themoviedb.org/).
   language, with a movies/series toggle, reusing the Phase 4 genre-filter/sort/browse machinery.
 - **Phase 5.1:** a generic, ready-to-configure playback provider (`embedProvider.ts`) — see
   [Playback status](#playback-status) below.
+- **Phase 6:** **Surprise me** (`/surprise`): a hand of 3 random movie, series or anime picks in one
+  tap, narrowed by mood, shuffled without waiting, with an optional AI mode; and a **Settings**
+  page (`/settings`) for the AI key and the app's preferences — see
+  [Surprise me and AI](#surprise-me-and-ai) below.
 
 Not built yet: a real playback provider (no licensed source has been identified — see
-[Playback status](#playback-status)), account-backed persistence and a settings page (both need
+[Playback status](#playback-status)), account-backed persistence (needs
 Supabase, not yet wired up), and an AI-powered recommendation feature. See
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -82,6 +86,25 @@ unavailable state. Leaving the variable unset still shows "Playback isn't availa
 `/upload` accepts a file, a title, a media type, and a TMDB id (plus season and episode for TV)
 and streams it to Stream's admin API. It is not linked from the nav or the footer. Sign in with
 `UPLOAD_PAGE_PASSWORD`. Only upload video you are allowed to host.
+
+## Surprise me and AI
+
+`/surprise` deals 3 picks (1, 3 or 5 in Settings) for Anything, Movies, Series or Anime, optionally
+narrowed by a mood ("Make me laugh", "Mind-bending", ...). A shuffle takes picks from a pool fetched
+once, so it is instant; each card can be swapped for another, and titles already in My List,
+Favorites or Recently Viewed are skipped (switchable). Anime is TMDB's Animation genre from Japan.
+
+**AI mode** needs no server setup. Open `/settings`, pick Anthropic or OpenAI, paste your own API
+key, and press Test connection. On `/surprise` an "Ask AI to choose" switch then appears, with an
+optional free-text request ("something like Inception, but funnier"). The AI only suggests names;
+every one is checked against TMDB, so only real titles are shown, each with the AI's reason. If the
+AI fails, the page says so and deals random picks instead.
+
+Where the key lives: in this browser's `localStorage` only. A request to `/api/ai/*` carries it to
+this server, which forwards it to the provider (fixed hosts: `api.anthropic.com`,
+`api.openai.com`) and does not store or log it. The prompt is built on the server from structured
+fields, so the route is a picks service and not a general relay. Use a key with a small spending
+limit. There is no server-side AI key on purpose: on a public site it would let anyone spend it.
 
 ## Architecture
 

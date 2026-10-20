@@ -21,6 +21,8 @@ export interface UseLibraryResult extends LibrarySnapshot {
   removeFromWatchlist: (item: Pick<MediaItem, 'id' | 'mediaType'>) => void;
   removeFromFavorites: (item: Pick<MediaItem, 'id' | 'mediaType'>) => void;
   clearRecentlyViewed: () => void;
+  clearWatchlist: () => void;
+  clearFavorites: () => void;
 }
 
 /**
@@ -41,5 +43,7 @@ export function useLibrary(): UseLibraryResult {
     removeFromWatchlist: libraryStore.removeFromWatchlist,
     removeFromFavorites: libraryStore.removeFromFavorites,
     clearRecentlyViewed: libraryStore.clearRecentlyViewed,
+    clearWatchlist: libraryStore.clearWatchlist,
+    clearFavorites: libraryStore.clearFavorites,
   };
 }

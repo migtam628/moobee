@@ -1,6 +1,7 @@
-import type { PersonSummary, SearchPage } from '@/types/media';
+import type { MediaItem, PersonSummary, SearchPage } from '@/types/media';
 import { tmdbGet } from './client';
-import { mapMovieSummary, mapTvSummary, nonEmpty } from './mappers';
+import { mapMoviePage, mapMovieSummary, mapTvPage, mapTvSummary, nonEmpty } from './mappers';
+import { tmdbMoviePageSchema, tmdbTvPageSchema } from './schemas';
 import { tmdbSearchPageSchema } from './searchSchemas';
 import type { TmdbSearchPage } from './types';
 
@@ -61,4 +62,32 @@ export async function searchMulti(
     signal,
   });
   return mapSearchPage(raw);
+}
+
+/**
+ * Looks one title up by name (and first release year, when known) among movies or among shows.
+ * Used to check a title an AI suggested really exists. A blank title never hits the network.
+ */
+export async function searchTitle(
+  mediaType: 'movie' | 'tv',
+  title: string,
+  year?: number,
+  signal?: AbortSignal,
+): Promise<MediaItem[]> {
+  const query = title.trim();
+  if (!query) return [];
+  if (mediaType === 'movie') {
+    const raw = await tmdbGet('/search/movie', {
+      schema: tmdbMoviePageSchema,
+      params: { query, year, include_adult: false },
+      signal,
+    });
+    return mapMoviePage(raw).items;
+  }
+  const raw = await tmdbGet('/search/tv', {
+    schema: tmdbTvPageSchema,
+    params: { query, first_air_date_year: year, include_adult: false },
+    signal,
+  });
+  return mapTvPage(raw).items;
 }

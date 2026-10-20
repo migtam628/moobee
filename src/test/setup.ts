@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 import { libraryStore } from '@/lib/libraryStore';
+import { settingsStore } from '@/lib/settingsStore';
 
 afterEach(() => {
   cleanup();
@@ -12,6 +13,7 @@ afterEach(() => {
   if (typeof window !== 'undefined') {
     window.localStorage.clear();
     libraryStore.resetForTests();
+    settingsStore.resetForTests();
   }
 });
 

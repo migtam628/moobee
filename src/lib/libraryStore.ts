@@ -126,6 +126,14 @@ class LibraryStore {
     this.setList('recentlyViewed', []);
   };
 
+  clearWatchlist = (): void => {
+    this.setList('watchlist', []);
+  };
+
+  clearFavorites = (): void => {
+    this.setList('favorites', []);
+  };
+
   /**
    * Test-only: re-reads every list from `localStorage`. The store loads its snapshot once at
    * module import, so a test that clears `localStorage` between cases must call this afterwards
