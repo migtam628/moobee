@@ -147,6 +147,15 @@ describe('Settings page', () => {
     expect(window.localStorage.getItem('moobee:autoplay:v1')).toBe('false');
   });
 
+  it('sets whether player pages open in theater mode', async () => {
+    renderApp('/settings');
+    const toggle = await screen.findByRole('switch', { name: 'Theater mode' });
+    expect(toggle).not.toBeChecked();
+    await userEvent.click(toggle);
+    expect(toggle).toBeChecked();
+    expect(window.localStorage.getItem('moobee:player-theater:v1')).toBe('true');
+  });
+
   describe('lists', () => {
     it('shows the counts and disables clearing an empty list', async () => {
       libraryStore.toggleWatchlist(mediaItem({ id: 1 }));

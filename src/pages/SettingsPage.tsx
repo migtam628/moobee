@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/Switch';
 import { useAutoplayPreference } from '@/hooks/useAutoplayPreference';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useLibrary } from '@/hooks/useLibrary';
+import { usePlayerView } from '@/hooks/usePlayerView';
 import { useSettings } from '@/hooks/useSettings';
 import { cn } from '@/lib/cn';
 import { pluralize } from '@/lib/format';
@@ -25,6 +26,7 @@ export function SettingsPage() {
   useDocumentTitle('Settings');
   const { settings, update, reset } = useSettings();
   const [autoplay, setAutoplay] = useAutoplayPreference();
+  const [theater, toggleTheater] = usePlayerView();
   const {
     watchlist,
     favorites,
@@ -128,6 +130,12 @@ export function SettingsPage() {
         <SettingsSection title="Playback">
           <SettingRow label="Autoplay" hint="Start the video as soon as a player page opens.">
             <AutoplayToggle autoplay={autoplay} onChange={setAutoplay} />
+          </SettingRow>
+          <SettingRow
+            label="Theater mode"
+            hint="Open player pages with the wide player. The T key switches it on a player page."
+          >
+            <Switch checked={theater} onChange={toggleTheater} label="Theater mode" />
           </SettingRow>
         </SettingsSection>
 
