@@ -219,6 +219,36 @@ and it gained an `extraControls?: ReactNode` slot rendered next to `SortControl`
 `'movie' | 'tv'` to a plain `string` "kind" discriminator (`'anime-movie'` / `'anime-tv'`), so the
 new anime queries get their own cache entries and never collide with the plain browse pages'.
 
+## Surprise me, AI and Settings (Phase 6)
+
+**Surprise me** (`/surprise`, `SurprisePage`). The pure logic is in `src/lib/surprise.ts`: moods map
+to TMDB genre ids per type (movie and TV genres differ), `buildPoolPlan` turns a kind and mood into
+the TMDB lists to draw from (a random page of 1 to 6 of well-liked titles, via `discoverPool` in
+`api/tmdb/discover.ts`: popularity order, a vote-count floor and a rating floor; anime is Animation
+with Japanese original language, and a mood can only narrow it to one genre because TMDB cannot mix
+"all of" and "any of"), and `preparePool`, `interleaveTypes` and `matchSuggestion` shuffle, mix and
+verify. `useSurprise` holds the state: a *pool* is fetched once per request (kind, mood, AI text) and
+dealt from, so shuffling and swapping a card cost no network until the pool runs dry; picks already
+dealt, and (by setting) anything in the library, are skipped, and a narrow pool may repeat earlier
+picks rather than deal a short hand. The first hand is dealt on open from TMDB at random; the AI is
+only called when the button is pressed. Safe under React StrictMode (`deal` cancels the earlier call).
+
+**AI mode.** `server/aiProxy.ts` (`/api/ai/picks`, `/api/ai/test`) relays to Anthropic or OpenAI with
+the *viewer's* key, sent with each request. It stores and logs nothing, only calls fixed hosts, builds
+the prompt itself from validated fields (viewer text is passed as JSON data, with an instruction to
+treat it as data), parses the reply defensively, and maps upstream failures to codes
+(`AI_KEY_REJECTED`, `AI_RATE_LIMITED`, ...) without passing the upstream body on. The browser side is
+`src/api/ai/client.ts`. The AI only returns names: `useSurprise` checks each against TMDB
+(`searchTitle`, same name and a year within one) and shows only titles that exist, with the AI's
+reason. Any failure falls back to random picks with a notice. There is deliberately no server-side
+key: on a public site it would let anyone spend it.
+
+**Settings** (`/settings`, `SettingsPage`). `src/lib/settingsStore.ts` is an external store built like
+the library store (`localStorage` key `moobee:settings:v1`, `useSyncExternalStore` through
+`useSettings`, synced across tabs). Stored values are normalised on load, so a broken or old entry
+falls back to defaults one field at a time. It holds the AI provider, model and key and the Surprise
+preferences; Settings also edits the autoplay preference (own key), clears the lists, and resets.
+
 ## Playback and persistence: scope decisions
 
 Two features that were in scope for this phase are deliberately **not** built:
@@ -258,6 +288,11 @@ Two features that were in scope for this phase are deliberately **not** built:
 - `.env` is git-ignored. Server-only upload settings are `UPLOAD_PAGE_PASSWORD`,
   `UPLOAD_SESSION_SECRET`, `STREAM_ADMIN_API_KEY`, and `STREAM_API_BASE_URL`. The stream admin key
   is never given a `VITE_` name.
+- The AI key is the viewer's own, kept in their browser's `localStorage` (an XSS bug would expose it,
+  so it should be a key with a spending limit). `/api/ai/*` is a POST-only JSON relay: it forwards
+  the key to fixed provider hosts, never stores or logs it or echoes it (or the upstream body) in
+  errors, validates the key and model shape (no header injection), bounds the body (32 KB) and the
+  viewer text, and builds the prompt itself. There is no server-held AI key.
 
 ## Error handling
 
@@ -286,6 +321,8 @@ src/
     player/                VideoPlayer, PlaybackUnavailable, PlayerHeader, AutoplayToggle,
                            EpisodeNavigation
     browse/                GenreFilter, SortControl, MediaBrowseView, MediaKindToggle
+    surprise/              PickCard, PickControls
+    settings/              SettingsSection, SettingRow, AiSettings
     search/                SearchResults
     ui/                    ErrorState, EmptyState, LoadingSkeleton, PageLoader, Modal
   config/env.ts            validated client environment
@@ -316,6 +353,8 @@ src/
 | `/tv/:id`                        | Implemented (Phase 2)                          |
 | `/tv/:id/season/:season`         | Implemented (Phase 3)                          |
 | `/movies`, `/tv`                 | Implemented (Phase 4) — genre filter, sort     |
+| `/surprise`                      | Implemented (Phase 6) — random or AI picks     |
+| `/settings`                      | Implemented (Phase 6) — AI key, preferences    |
 | `/person/:id`                    | Implemented (Phase 4)                          |
 | `/anime`                         | Implemented (Phase 5) — movies/series toggle   |
 | `/search?q=`                     | Implemented (Phase 2)                          |

@@ -2,6 +2,7 @@ import { fileURLToPath, URL } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
+import { AI_MOUNT_PATH, createAiProxyMiddleware } from './server/aiProxy.ts';
 import { createTmdbProxyMiddleware, TMDB_PROXY_MOUNT_PATH } from './server/tmdbProxy.ts';
 import { createUploadMiddleware, UPLOAD_MOUNT_PATH } from './server/uploadProxy.ts';
 
@@ -28,6 +29,20 @@ function uploadProxyPlugin(env: Record<string, string>): Plugin {
   };
 }
 
+/** The "ask AI" relay. It holds no key: the viewer's own key comes with each request. */
+function aiProxyPlugin(): Plugin {
+  const middleware = createAiProxyMiddleware();
+  return {
+    name: 'moobee-ai-proxy',
+    configureServer(server) {
+      server.middlewares.use(AI_MOUNT_PATH, middleware);
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(AI_MOUNT_PATH, middleware);
+    },
+  };
+}
+
 function tmdbProxyPlugin(env: Record<string, string>): Plugin {
   const middleware = createTmdbProxyMiddleware({
     token: env.TMDB_READ_ACCESS_TOKEN,
@@ -48,7 +63,13 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    plugins: [react(), tailwindcss(), tmdbProxyPlugin(env), uploadProxyPlugin(env)],
+    plugins: [
+      react(),
+      tailwindcss(),
+      tmdbProxyPlugin(env),
+      uploadProxyPlugin(env),
+      aiProxyPlugin(),
+    ],
     resolve: {
       alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
     },

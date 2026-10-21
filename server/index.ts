@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
+import { AI_MOUNT_PATH, createAiProxyMiddleware } from './aiProxy.ts';
 import { createTmdbProxyMiddleware, TMDB_PROXY_MOUNT_PATH } from './tmdbProxy.ts';
 import { createUploadMiddleware, UPLOAD_MOUNT_PATH } from './uploadProxy.ts';
 
@@ -38,6 +39,9 @@ app.use(
     baseUrl: process.env.TMDB_API_BASE_URL,
   }),
 );
+
+// "Ask AI" relay. No key of its own: the viewer's key (kept in their browser) comes with each request.
+app.use(AI_MOUNT_PATH, createAiProxyMiddleware());
 
 app.use(
   UPLOAD_MOUNT_PATH,

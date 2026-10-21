@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react';
+import { Search, Settings } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import { useScrolled } from '@/hooks/useScrolled';
 import { cn } from '@/lib/cn';
@@ -49,14 +49,23 @@ export function Navbar() {
           </nav>
         </div>
 
-        {/* On phones, search lives in the bottom tab bar instead. */}
-        <Link
-          to={paths.search}
-          aria-label="Search movies and TV"
-          className="hidden size-10 place-items-center rounded-full text-fg transition hover:bg-white/10 md:grid"
-        >
-          <Search aria-hidden="true" className="size-5" />
-        </Link>
+        <div className="flex items-center gap-1">
+          {/* On phones, search lives in the bottom tab bar instead. */}
+          <Link
+            to={paths.search}
+            aria-label="Search movies and TV"
+            className="hidden size-10 place-items-center rounded-full text-fg transition hover:bg-white/10 md:grid"
+          >
+            <Search aria-hidden="true" className="size-5" />
+          </Link>
+          <Link
+            to={paths.settings}
+            aria-label="Settings"
+            className="grid size-10 place-items-center rounded-full text-fg transition hover:bg-white/10"
+          >
+            <Settings aria-hidden="true" className="size-5" />
+          </Link>
+        </div>
       </div>
     </header>
   );

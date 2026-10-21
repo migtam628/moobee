@@ -1,5 +1,6 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
+import { StrictMode } from 'react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { vi } from 'vitest';
 import { appRoutes } from '@/app/routes';
@@ -10,7 +11,7 @@ export type ApiHandler = (url: URL) => Response | Promise<Response>;
 
 /** Replaces fetch with a fake TMDB proxy routed by `handler`; returns the mock to inspect calls. */
 export function stubApi(handler: ApiHandler) {
-  const fetchMock = vi.fn((input: RequestInfo | URL) =>
+  const fetchMock = vi.fn((input: RequestInfo | URL, _init?: RequestInit) =>
     Promise.resolve(handler(new URL(toUrlString(input), 'http://localhost'))),
   );
   vi.stubGlobal('fetch', fetchMock);
@@ -22,14 +23,15 @@ export const requestedUrls = (fetchMock: ReturnType<typeof stubApi>): URL[] =>
   fetchMock.mock.calls.map(([input]) => new URL(toUrlString(input), 'http://localhost'));
 
 /** Mounts the real route table at `path` inside a fresh query client (no retries, so failures are fast). */
-export function renderApp(path: string) {
+export function renderApp(path: string, { strict = false }: { strict?: boolean } = {}) {
   const router = createMemoryRouter(appRoutes, { initialEntries: [path] });
   const queryClient = createQueryClient();
   queryClient.setDefaultOptions({ queries: { retry: false } });
-  render(
+  const app = (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
+  render(strict ? <StrictMode>{app}</StrictMode> : app);
   return { router, queryClient };
 }

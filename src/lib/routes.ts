@@ -15,6 +15,8 @@ export const paths = {
   watchTv: (id: number, seasonNumber: number, episodeNumber: number) =>
     `/watch/tv/${id}/${seasonNumber}/${episodeNumber}`,
   watchlist: '/watchlist',
+  surprise: '/surprise',
+  settings: '/settings',
   /** Not linked from the public nav. Password-protected upload into MooBee Stream. */
   upload: '/upload',
   person: (id: number) => `/person/${id}`,
