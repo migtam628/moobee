@@ -40,3 +40,14 @@ export function formatAirDate(isoDate: string | undefined): string | undefined {
   if (Number.isNaN(date.getTime())) return undefined;
   return AIR_DATE_FORMATTER.format(date);
 }
+
+const COUNT_FORMATTER = new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+
+/** "1.2K", "28K", "3.4M". Returns undefined for a missing, negative or non-finite count. */
+export function formatCount(count: number | undefined): string | undefined {
+  if (count === undefined || !Number.isFinite(count) || count < 0) return undefined;
+  return COUNT_FORMATTER.format(count);
+}

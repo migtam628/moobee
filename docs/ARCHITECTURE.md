@@ -126,12 +126,21 @@ registration code for when one is authorized. It is imported once, as a side eff
 `src/main.tsx`, so a future `register()` call actually runs at startup.
 
 **Player pages.** `MoviePlayerPage` (`/watch/movie/:id`) and `TvPlayerPage`
-(`/watch/tv/:id/:season/:episode`) are full page shells: back button, title/metadata header
-(`PlayerHeader`), an autoplay preference toggle (`AutoplayToggle`, persisted to `localStorage` via
-`useAutoplayPreference`), and for TV, prev/next episode navigation (`EpisodeNavigation`) that
-rolls over into the next (or previous) season at a season boundary. `VideoPlayer`
+(`/watch/tv/:id/:season/:episode`) are laid out like a video site's watch page (`WatchLayout`):
+the player with its title, a "channel" row (the show or the movie's director, with Watchlist,
+Favorite, Share and Details pills, plus prev/next episode for TV via `EpisodeNavigation`, which
+rolls over into the next or previous season at a season boundary) and a grey description box
+(`DescriptionBox`: rating, votes and date, genres as #tags, the synopsis with "…more", and the
+credits once opened) on the left, and an "Up next" column (`UpNext`) on the right: the Autoplay
+switch (`AutoplayToggle`, persisted via `useAutoplayPreference`), filter chips and thumbnail rows.
+For a show the chips are Episodes (with a season picker that changes only the list, not what is
+playing), More like this and Similar; for a movie, More like this and Similar. Theater mode
+(`usePlayerView`, persisted, `t` shortcut) widens the player across the page with the info and
+the list below it; the slots are placed with CSS grid, not moved in the tree, so toggling never
+remounts the iframe. Under `lg` everything is one column with a full-bleed player. The pure
+helpers (stats line, up-next rows, anime detection) are in `src/lib/watch.ts`. `VideoPlayer`
 (`src/components/player/VideoPlayer.tsx`) is a responsive 16:9 `<iframe>` embed with a loading
-skeleton, retry-on-error, and a fullscreen toggle. It keeps its own host allowlist
+skeleton, retry-on-error, and theater and fullscreen toggles. It keeps its own host allowlist
 (`ALLOWED_PLAYER_HOSTS`, currently empty) as a second, independent safety gate on top of the
 provider registry — an unexpected host can never reach the `<iframe>` even if a bug let a bad URL
 through the registry, and both allowlists must be updated together when a real provider is added.
@@ -318,7 +327,7 @@ src/
                            TrailerModal, SearchBox, WatchlistButton, FavoriteButton, skeletons
     details/               DetailsView, DetailsHero, DetailsSkeleton
     tv/                    SeasonSelector, EpisodeSelector
-    player/                VideoPlayer, PlaybackUnavailable, PlayerHeader, AutoplayToggle,
+    player/                VideoPlayer, PlaybackUnavailable, WatchLayout, WatchInfo, DescriptionBox, UpNext, AutoplayToggle,
                            EpisodeNavigation
     browse/                GenreFilter, SortControl, MediaBrowseView, MediaKindToggle
     surprise/              PickCard, PickControls

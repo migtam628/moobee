@@ -7,7 +7,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
  */
 export function PlaybackUnavailable() {
   return (
-    <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-surface">
+    <div className="flex aspect-video w-full items-center justify-center bg-surface sm:rounded-xl">
       <EmptyState
         compact
         icon={<VideoOff className="size-8" />}

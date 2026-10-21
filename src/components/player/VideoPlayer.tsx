@@ -1,8 +1,9 @@
-import { Maximize2, Minimize2 } from 'lucide-react';
+import { Maximize2, Minimize2, RectangleHorizontal } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Skeleton } from '@/components/ui/LoadingSkeleton';
 import { env } from '@/config/env';
+import { cn } from '@/lib/cn';
 import { getSafeExternalUrl } from '@/lib/url';
 
 /**
@@ -72,14 +73,27 @@ interface VideoPlayerProps {
   /** Used for the iframe's accessible title and the error message. */
   title: string;
   autoplay?: boolean;
+  /** Wide "theater" view. Only changes the frame's shape; the page lays out the rest. */
+  theater?: boolean;
+  /** When given, a theater-mode button is shown (large screens only, where the view differs). */
+  onToggleTheater?: () => void;
 }
 
+const CONTROL_CLASSES =
+  'inline-flex items-center justify-center rounded-full bg-black/70 p-2.5 text-fg opacity-0 backdrop-blur-sm transition-opacity duration-200 group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100';
+
 /**
- * Responsive 16:9 embed with a loading state, a fullscreen toggle and an error state. Knows
+ * Responsive 16:9 embed with a loading state, a theater toggle, a fullscreen toggle and an error state. Knows
  * nothing about TMDB, provider selection, or URL construction — it only renders the URL it's
  * given. See `src/services/playback` for where that URL comes from.
  */
-export function VideoPlayer({ src, title, autoplay = false }: VideoPlayerProps) {
+export function VideoPlayer({
+  src,
+  title,
+  autoplay = false,
+  theater = false,
+  onToggleTheater,
+}: VideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   // Bumping this remounts `PlayerFrame`, which is the only reliable way to retry a failed embed.
@@ -107,7 +121,7 @@ export function VideoPlayer({ src, title, autoplay = false }: VideoPlayerProps) 
 
   if (!safeSrc) {
     return (
-      <div className="flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl bg-surface">
+      <div className="flex aspect-video w-full items-center justify-center overflow-hidden bg-surface sm:rounded-xl">
         <ErrorState compact title="This source can't be played" />
       </div>
     );
@@ -116,7 +130,11 @@ export function VideoPlayer({ src, title, autoplay = false }: VideoPlayerProps) 
   return (
     <div
       ref={containerRef}
-      className="group relative aspect-video w-full overflow-hidden rounded-xl bg-black"
+      className={cn(
+        'group relative aspect-video w-full overflow-hidden bg-black sm:rounded-xl',
+        // In theater the frame keeps to the screen's height and sits in the middle of the black band.
+        theater && 'lg:mx-auto lg:max-h-[calc(100dvh-8.5rem)] lg:rounded-none',
+      )}
     >
       <PlayerFrame
         key={`${safeSrc}:${attempt}`}
@@ -128,18 +146,33 @@ export function VideoPlayer({ src, title, autoplay = false }: VideoPlayerProps) 
         }}
       />
 
-      <button
-        type="button"
-        onClick={toggleFullscreen}
-        aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-        className="absolute right-3 bottom-3 inline-flex items-center justify-center rounded-full bg-black/70 p-2.5 text-fg opacity-0 backdrop-blur-sm transition-opacity duration-200 group-focus-within:opacity-100 group-hover:opacity-100 focus:opacity-100"
-      >
-        {isFullscreen ? (
-          <Minimize2 aria-hidden="true" className="size-4" />
-        ) : (
-          <Maximize2 aria-hidden="true" className="size-4" />
-        )}
-      </button>
+      {/* Top right, so they never cover the player's own control bar along the bottom. */}
+      <div className="absolute top-3 right-3 flex gap-2">
+        {onToggleTheater ? (
+          <button
+            type="button"
+            onClick={onToggleTheater}
+            aria-pressed={theater}
+            aria-label="Theater mode"
+            title="Theater mode (t)"
+            className={cn(CONTROL_CLASSES, 'max-lg:hidden', theater && 'text-accent')}
+          >
+            <RectangleHorizontal aria-hidden="true" className="size-4" />
+          </button>
+        ) : null}
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          className={CONTROL_CLASSES}
+        >
+          {isFullscreen ? (
+            <Minimize2 aria-hidden="true" className="size-4" />
+          ) : (
+            <Maximize2 aria-hidden="true" className="size-4" />
+          )}
+        </button>
+      </div>
     </div>
   );
 }
