@@ -6,4 +6,8 @@ describe('NAV_ITEMS', () => {
   it('does not link to the upload page', () => {
     expect(NAV_ITEMS.map((item) => item.to)).not.toContain(paths.upload);
   });
+
+  it('links to the AI finder', () => {
+    expect(NAV_ITEMS.map((item) => item.to)).toContain(paths.find);
+  });
 });

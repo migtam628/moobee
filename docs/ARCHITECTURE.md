@@ -242,7 +242,7 @@ dealt, and (by setting) anything in the library, are skipped, and a narrow pool 
 picks rather than deal a short hand. The first hand is dealt on open from TMDB at random; the AI is
 only called when the button is pressed. Safe under React StrictMode (`deal` cancels the earlier call).
 
-**AI mode.** `server/aiProxy.ts` (`/api/ai/picks`, `/api/ai/test`) relays to Anthropic or OpenAI with
+**AI mode.** `server/aiProxy.ts` (`/api/ai/picks`, `/api/ai/find`, `/api/ai/test`) relays to Anthropic or OpenAI with
 the *viewer's* key, sent with each request. It stores and logs nothing, only calls fixed hosts, builds
 the prompt itself from validated fields (viewer text is passed as JSON data, with an instruction to
 treat it as data), parses the reply defensively, and maps upstream failures to codes
@@ -251,6 +251,19 @@ treat it as data), parses the reply defensively, and maps upstream failures to c
 (`searchTitle`, same name and a year within one) and shows only titles that exist, with the AI's
 reason. Any failure falls back to random picks with a notice. There is deliberately no server-side
 key: on a public site it would let anyone spend it.
+
+**Find with AI** (`/find`, `FindPage`, `useFinder`). A conversation with the same relay, on its own
+route `/api/ai/find` (`readFindRequest`, `buildFindPrompt`, `parseFind` in `server/aiProxy.ts`). Each
+message sends the new ask, up to 6 earlier turns (what was asked and the titles shown, as plain
+strings, never the AI's own earlier text, so the relay still builds the whole prompt from validated
+fields) and the viewer's taste. The reply is `{reply, picks}`; no picks with a reply is the AI asking
+a question, which is shown as is. The prompt tells it to answer in the viewer's language, put the most
+likely match first when the viewer is trying to remember a title, and not to repeat shown titles.
+`src/api/ai/resolve.ts` (`resolveSuggestions`, shared with `useSurprise`) checks each name against
+TMDB in parallel and drops anything that does not exist, repeats and titles already shown in the
+thread; up to 8 are asked for and 6 shown, the spares covering invented titles. The thread is
+kept in `sessionStorage` (finished turns only; read back defensively) so coming back from a title's
+page finds it. `?ask=` fills the box without sending, which is how a search with no results hands over.
 
 **Settings** (`/settings`, `SettingsPage`). `src/lib/settingsStore.ts` is an external store built like
 the library store (`localStorage` key `moobee:settings:v1`, `useSyncExternalStore` through
@@ -330,7 +343,7 @@ src/
     player/                VideoPlayer, PlaybackUnavailable, WatchLayout, WatchInfo, DescriptionBox, UpNext, AutoplayToggle,
                            EpisodeNavigation
     browse/                GenreFilter, SortControl, MediaBrowseView, MediaKindToggle
-    surprise/              PickCard, PickControls
+    surprise/              PickCard, PickControls (the finder reuses PickCard)
     settings/              SettingsSection, SettingRow, AiSettings
     search/                SearchResults
     ui/                    ErrorState, EmptyState, LoadingSkeleton, PageLoader, Modal
@@ -363,6 +376,7 @@ src/
 | `/tv/:id/season/:season`         | Implemented (Phase 3)                          |
 | `/movies`, `/tv`                 | Implemented (Phase 4) — genre filter, sort     |
 | `/surprise`                      | Implemented (Phase 6) — random or AI picks     |
+| `/find`                          | Implemented (Phase 6.1) — AI chat to find a title |
 | `/settings`                      | Implemented (Phase 6) — AI key, preferences    |
 | `/person/:id`                    | Implemented (Phase 4)                          |
 | `/anime`                         | Implemented (Phase 5) — movies/series toggle   |

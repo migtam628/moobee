@@ -3,6 +3,7 @@ import { jsonResponse } from '@/test/fixtures';
 import {
   AiError,
   getAiErrorMessage,
+  requestAiFind,
   requestAiPicks,
   testAiConnection,
   type AiCredentials,
@@ -73,6 +74,71 @@ describe('requestAiPicks', () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new DOMException('x', 'AbortError')));
     await expect(requestAiPicks(credentials, request)).rejects.toMatchObject({
       name: 'AbortError',
+    });
+  });
+});
+
+describe('requestAiFind', () => {
+  const find = {
+    kind: 'any' as const,
+    ask: 'a heist with a twist',
+    history: [{ asked: 'tense', suggested: ['Heat'] }],
+    taste: [],
+    count: 8,
+  };
+
+  it('posts the key and the message to the finder route and returns the reply and suggestions', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse({
+        success: true,
+        reply: 'Try these.',
+        picks: [{ title: 'The Prestige', year: 2006, type: 'movie', reason: 'A twist.' }],
+      }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const answer = await requestAiFind(credentials, find);
+
+    expect(answer).toEqual({
+      reply: 'Try these.',
+      suggestions: [{ title: 'The Prestige', year: 2006, type: 'movie', reason: 'A twist.' }],
+    });
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('/api/ai/find');
+    expect(JSON.parse(init.body as string)).toEqual({ ...credentials, request: find });
+  });
+
+  it('accepts a question with no suggestions', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(jsonResponse({ success: true, reply: 'Movie or series?', picks: [] })),
+    );
+    expect(await requestAiFind(credentials, find)).toEqual({
+      reply: 'Movie or series?',
+      suggestions: [],
+    });
+  });
+
+  it('rejects an answer in the wrong shape', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ success: true, picks: 3 })));
+    await expect(requestAiFind(credentials, find)).rejects.toMatchObject({
+      code: 'AI_BAD_RESPONSE',
+    });
+  });
+
+  it('turns the relay’s error codes into AiError', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          jsonResponse({ code: 'AI_KEY_REJECTED', message: 'no' }, { status: 401 }),
+        ),
+    );
+    await expect(requestAiFind(credentials, find)).rejects.toMatchObject({
+      code: 'AI_KEY_REJECTED',
     });
   });
 });

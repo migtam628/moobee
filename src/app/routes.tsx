@@ -30,6 +30,7 @@ export const appRoutes: RouteObject[] = [
       { path: 'watch/tv/:id/:season/:episode', lazy: () => import('@/pages/TvPlayerPage') },
       { path: 'watchlist', lazy: () => import('@/pages/WatchlistPage') },
       { path: 'surprise', lazy: () => import('@/pages/SurprisePage') },
+      { path: 'find', lazy: () => import('@/pages/FindPage') },
       { path: 'settings', lazy: () => import('@/pages/SettingsPage') },
       { path: 'upload', lazy: () => import('@/pages/UploadPage') },
 

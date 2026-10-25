@@ -55,6 +55,31 @@ const picksResponseSchema = z.object({
 
 export type AiSuggestion = z.output<typeof picksResponseSchema>['picks'][number];
 
+/** One earlier exchange in the finder chat: what the viewer asked and the titles they were shown. */
+export interface AiFindTurn {
+  asked: string;
+  suggested: string[];
+}
+
+export interface AiFindRequest {
+  kind: PickKind;
+  ask: string;
+  history: AiFindTurn[];
+  taste: string[];
+  count: number;
+}
+
+const findResponseSchema = z.object({
+  reply: z.string(),
+  picks: picksResponseSchema.shape.picks,
+});
+
+export interface AiFindReply {
+  /** What the AI says: an introduction to the picks, or a question when it needs more to go on. */
+  reply: string;
+  suggestions: AiSuggestion[];
+}
+
 const errorSchema = z.object({ code: z.string().optional(), message: z.string().optional() });
 
 const KNOWN_CODES: readonly AiErrorCode[] = [
@@ -129,6 +154,18 @@ export async function requestAiPicks(
   const parsed = picksResponseSchema.safeParse(data);
   if (!parsed.success) throw new AiError('AI_BAD_RESPONSE', 'bad response');
   return parsed.data.picks;
+}
+
+/** One message of the finder chat. The suggestions are only names: check them against TMDB. */
+export async function requestAiFind(
+  credentials: AiCredentials,
+  request: AiFindRequest,
+  signal?: AbortSignal,
+): Promise<AiFindReply> {
+  const data = await post('/find', { ...credentials, request }, signal);
+  const parsed = findResponseSchema.safeParse(data);
+  if (!parsed.success) throw new AiError('AI_BAD_RESPONSE', 'bad response');
+  return { reply: parsed.data.reply, suggestions: parsed.data.picks };
 }
 
 /** Makes a tiny request to check the key and model work. Resolves with the model that answered. */

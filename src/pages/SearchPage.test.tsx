@@ -195,6 +195,13 @@ describe('search page: loading, empty and error states', () => {
     ).toBeInTheDocument();
   });
 
+  it('offers the AI finder from a search with no results, with the search carried over', async () => {
+    stubApi(resultsHandler([]));
+    renderApp('/search?q=zzzzqx');
+    const link = await screen.findByRole('link', { name: /Don.t know the name/ });
+    expect(link).toHaveAttribute('href', '/find?ask=zzzzqx');
+  });
+
   it('shows a readable, retryable error', async () => {
     let failing = true;
     stubApi((url) =>

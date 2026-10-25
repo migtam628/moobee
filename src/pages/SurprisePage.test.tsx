@@ -41,6 +41,16 @@ describe('Surprise page', () => {
     expect(await cards()).toHaveLength(3);
   });
 
+  it('links to the AI finder for people who know what they want', async () => {
+    stubApi(api);
+    renderApp('/surprise');
+    await cards();
+    expect(screen.getByRole('link', { name: /Describe it to the AI/ })).toHaveAttribute(
+      'href',
+      '/find',
+    );
+  });
+
   it('opens with a hand of three picks, movies and series mixed', async () => {
     stubApi(api);
     renderApp('/surprise');

@@ -1,4 +1,5 @@
-import { Loader2, SearchX, Telescope } from 'lucide-react';
+import { Loader2, SearchX, Telescope, WandSparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { MediaGrid, MediaGridSkeleton } from '@/components/media/MediaGrid';
 import { PersonCard } from '@/components/media/PersonCard';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -6,6 +7,7 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { MIN_SEARCH_LENGTH, type SearchQuery } from '@/hooks/useMediaQueries';
 import { cn } from '@/lib/cn';
 import { pluralize } from '@/lib/format';
+import { paths } from '@/lib/routes';
 import type { PersonSummary } from '@/types/media';
 
 interface SearchResultsProps {
@@ -65,6 +67,15 @@ export function SearchResults({ typedTerm, searchTerm, search }: SearchResultsPr
         icon={<SearchX className="size-10" />}
         title={`No results for “${searchTerm}”`}
         description="Check the spelling or try a different title or name."
+        action={
+          <Link
+            to={paths.findFor(searchTerm)}
+            className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2 text-sm font-medium text-fg transition hover:bg-white/15"
+          >
+            <WandSparkles aria-hidden="true" className="size-4 text-accent" />
+            Don&apos;t know the name? Ask AI
+          </Link>
+        }
       />
     );
   }

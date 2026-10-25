@@ -1,4 +1,5 @@
-import { Dices, Shuffle } from 'lucide-react';
+import { Dices, Shuffle, WandSparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { getAiErrorMessage } from '@/api/ai/client';
 import { PickCard } from '@/components/surprise/PickCard';
@@ -9,6 +10,7 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useSettings } from '@/hooks/useSettings';
 import { useSurprise } from '@/hooks/useSurprise';
 import { cn } from '@/lib/cn';
+import { paths } from '@/lib/routes';
 import type { MoodId } from '@/lib/surprise';
 import type { PickKind } from '@/types/settings';
 
@@ -67,6 +69,13 @@ export function SurprisePage() {
           Can&apos;t decide? Get {count === 1 ? 'a pick' : `${String(count)} picks`} in one tap,
           then shuffle until something looks good.
         </p>
+        <Link
+          to={paths.find}
+          className="mt-3 inline-flex items-center gap-1.5 text-sm text-muted underline-offset-2 transition hover:text-fg hover:underline"
+        >
+          <WandSparkles aria-hidden="true" className="size-4 text-accent" />
+          Know what you want? Describe it to the AI
+        </Link>
       </header>
 
       <div className="mt-8">

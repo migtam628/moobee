@@ -16,6 +16,9 @@ export const paths = {
     `/watch/tv/${id}/${seasonNumber}/${episodeNumber}`,
   watchlist: '/watchlist',
   surprise: '/surprise',
+  find: '/find',
+  /** The Find with AI page with the message box already filled in (not sent). */
+  findFor: (ask: string) => `/find?ask=${encodeURIComponent(ask)}`,
   settings: '/settings',
   /** Not linked from the public nav. Password-protected upload into MooBee Stream. */
   upload: '/upload',

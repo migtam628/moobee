@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { requestAiPicks } from '@/api/ai/client';
-import { discoverPool, isAbortError, searchTitle } from '@/api/tmdb';
+import { resolveSuggestions } from '@/api/ai/resolve';
+import { discoverPool, isAbortError } from '@/api/tmdb';
 import { useLibrary } from '@/hooks/useLibrary';
 import { useSettings } from '@/hooks/useSettings';
 import { getMediaKey } from '@/lib/media';
@@ -8,7 +9,6 @@ import {
   buildPoolPlan,
   getMood,
   interleaveTypes,
-  matchSuggestion,
   preparePool,
   tasteTitles,
   type MoodId,
@@ -151,37 +151,8 @@ export function useSurprise(): UseSurpriseResult {
         signal,
       );
 
-      // Check every suggestion against TMDB, in parallel: only titles that exist are shown.
-      const resolved = await Promise.all(
-        suggestions.map(async (suggestion): Promise<Pick | undefined> => {
-          try {
-            const results = await searchTitle(
-              suggestion.type,
-              suggestion.title,
-              suggestion.year,
-              signal,
-            );
-            const item =
-              matchSuggestion(results, suggestion) ??
-              matchSuggestion(
-                await searchTitle(suggestion.type, suggestion.title, undefined, signal),
-                suggestion,
-              );
-            return item ? { item, reason: suggestion.reason } : undefined;
-          } catch (caught) {
-            if (isAbortError(caught)) throw caught;
-            return undefined;
-          }
-        }),
-      );
-      const seen = new Set<string>();
-      return resolved.filter((entry): entry is Pick => {
-        if (!entry) return false;
-        const key = getMediaKey(entry.item);
-        if (seen.has(key) || exclude.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
+      // Only titles that exist in TMDB are shown.
+      return resolveSuggestions(suggestions, signal, exclude);
     },
     [excludedKeys],
   );

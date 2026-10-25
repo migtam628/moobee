@@ -10,20 +10,20 @@ export function MobileNav() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-canvas/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden"
     >
       <ul className="flex">
-        {NAV_ITEMS.map(({ label, to, icon: Icon, end }) => (
+        {NAV_ITEMS.map(({ label, shortLabel, to, icon: Icon, end }) => (
           <li key={to} className="min-w-0 flex-1">
             <NavLink
               to={to}
               end={end ?? false}
               className={({ isActive }) =>
                 cn(
-                  'flex min-h-14 flex-col items-center justify-center gap-1 text-[0.7rem] font-medium transition-colors',
+                  'flex min-h-14 flex-col items-center justify-center gap-1 text-[0.65rem] font-medium whitespace-nowrap transition-colors',
                   isActive ? 'text-accent' : 'text-muted hover:text-fg',
                 )
               }
             >
               <Icon aria-hidden="true" className="size-5" />
-              {label}
+              {shortLabel ?? label}
             </NavLink>
           </li>
         ))}

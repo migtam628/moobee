@@ -23,6 +23,8 @@ A movie and TV discovery app powered by [TMDB](https://www.themoviedb.org/).
   tap, narrowed by mood, shuffled without waiting, with an optional AI mode; and a **Settings**
   page (`/settings`) for the AI key and the app's preferences — see
   [Surprise me and AI](#surprise-me-and-ai) below.
+- **Phase 6.1:** **Find with AI** (`/find`, "Ask AI" in the menu): a chat where you say what you feel
+  like watching, or describe a movie you half remember, and keep talking to narrow it down.
 
 Not built yet: a real playback provider (no licensed source has been identified — see
 [Playback status](#playback-status)), account-backed persistence (needs
@@ -112,6 +114,15 @@ key, and press Test connection. On `/surprise` an "Ask AI to choose" switch then
 optional free-text request ("something like Inception, but funnier"). The AI only suggests names;
 every one is checked against TMDB, so only real titles are shown, each with the AI's reason. If the
 AI fails, the page says so and deals random picks instead.
+
+**Find with AI** (`/find`) is the same AI key used as a chat. Type what you feel like ("a heist movie
+with a twist, nothing too violent"), something you half remember ("a man relives the same day over
+and over"), or "something like Parasite", and it answers with up to 6 titles and a line on why each
+fits. Follow up ("older", "only series", "less scary") and it builds on what it already showed,
+never repeating a title. It answers in the language you write in, so Spanish works. A search with no
+results links to it with the search carried over. Every title is checked against TMDB. The
+conversation is kept for the browser tab, so opening a title and going back finds it again; "Start
+over" clears it.
 
 Where the key lives: in this browser's `localStorage` only. A request to `/api/ai/*` carries it to
 this server, which forwards it to the provider (fixed hosts: `api.anthropic.com`,
